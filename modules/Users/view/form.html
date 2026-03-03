@@ -1,0 +1,336 @@
+{extends='admin/layout.html'}
+
+{section='title'}{if isset($user)}Edit{else}Tambah{/if} User{/section}
+
+{section='content'}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-{if isset($user)}edit{else}plus{/if} me-2"></i>
+            {if isset($user)}Edit{else}Tambah{/if} User
+        </h1>
+        <a href="{url='admin/users/manage'}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+
+    <!-- Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informasi User</h6>
+                </div>
+                <div class="card-body">
+                    <form id="userForm" method="POST" action="{url='admin/users/save'}">
+                        {csrf_field}
+                        <input type="hidden" name="id" value="{if isset($user)}{$user.id}{/if}">
+                        
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                Username <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       value="{if isset($user)}{$user.username}{/if}"
+                                       placeholder="Username untuk login"
+                                       required
+                                       {if isset($user)}readonly{/if}>
+                            </div>
+                            <small class="text-muted">
+                                {if isset($user)}Username tidak dapat diubah{/else}Username unik dan tidak dapat diubah setelah dibuat{/if}
+                            </small>
+                        </div>
+
+                        <!-- Full Name -->
+                        <div class="mb-3">
+                            <label for="fullname" class="form-label">
+                                Nama Lengkap <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-id-badge"></i>
+                                </span>
+                                <input type="text" class="form-control" id="fullname" name="fullname" 
+                                       value="{if isset($user)}{$user.fullname}{/if}"
+                                       placeholder="Nama lengkap"
+                                       required>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                Email <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{if isset($user)}{$user.email}{/if}"
+                                       placeholder="email@example.com"
+                                       required>
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">
+                                No. Telepon
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-phone"></i>
+                                </span>
+                                <input type="text" class="form-control" id="phone" name="phone" 
+                                       value="{if isset($user)}{$user.phone}{/if}"
+                                       placeholder="08xxxxxxxxxx">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Role & Status -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Role & Status</h6>
+                </div>
+                <div class="card-body">
+                    <form id="userForm2" method="POST" action="{url='admin/users/save'}">
+                        {csrf_field}
+                        <input type="hidden" name="id" value="{if isset($user)}{$user.id}{/if}">
+                        
+                        <!-- Role -->
+                        <div class="mb-3">
+                            <label for="role" class="form-label">
+                                Role <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="">Pilih Role</option>
+                                <option value="admin" {if isset($user) && $user.role == 'admin'}selected{/if}>Administrator</option>
+                                <option value="dokter" {if isset($user) && $user.role == 'dokter'}selected{/if}>Dokter</option>
+                                <option value="perawat" {if isset($user) && $user.role == 'perawat'}selected{/if}>Perawat</option>
+                                <option value="farmasi" {if isset($user) && $user.role == 'farmasi'}selected{/if}>Farmasi</option>
+                                <option value="lab" {if isset($user) && $user.role == 'lab'}selected{/if}>Laboratorium</option>
+                                <option value="rad" {if isset($user) && $user.role == 'rad'}selected{/if}>Radiologi</option>
+                                <option value="kasir" {if isset($user) && $user.role == 'kasir'}selected{/if}>Kasir</option>
+                                <option value="admin_poli" {if isset($user) && $user.role == 'admin_poli'}selected{/if}>Admin Poli</option>
+                                <option value="staff" {if isset($user) && $user.role == 'staff'}selected{/if}>Staff</option>
+                            </select>
+                            <small class="text-muted">Role menentukan akses user</small>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="status" name="status" value="1"
+                                       {if !isset($user) || (isset($user) && $user.status == 1)}checked{/if}>
+                                <label class="form-check-label" for="status">
+                                    <span id="statusLabel">{if !isset($user) || (isset($user) && $user.status == 1)}Aktif{else}Nonaktif{/if}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Access Modules -->
+                        <div class="mb-3">
+                            <label class="form-label">Akses Modul</label>
+                            <select class="form-select" id="access" name="access[]" multiple size="5">
+                                <option value="dashboard" {if isset($user) && strpos($user.access ?? '', 'dashboard') !== false}selected{/if}>Dashboard</option>
+                                <option value="pasien" {if isset($user) && strpos($user.access ?? '', 'pasien') !== false}selected{/if}>Pasien</option>
+                                <option value="rawat_jalan" {if isset($user) && strpos($user.access ?? '', 'rawat_jalan') !== false}selected{/if}>Rawat Jalan</option>
+                                <option value="rawat_inap" {if isset($user) && strpos($user.access ?? '', 'rawat_inap') !== false}selected{/if}>Rawat Inap</option>
+                                <option value="farmasi" {if isset($user) && strpos($user.access ?? '', 'farmasi') !== false}selected{/if}>Farmasi</option>
+                            </select>
+                            <small class="text-muted">Tahan Ctrl untuk pilih multiple</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Password (only for new users or reset) -->
+            {if !isset($user)}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Password</h6>
+                </div>
+                <div class="card-body">
+                    <form id="passwordForm" method="POST" action="{url='admin/users/save'}">
+                        {csrf_field}
+                        <input type="hidden" name="id" value="{if isset($user)}{$user.id}{/if}">
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                Password <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Minimal 8 karakter"
+                                       minlength="8"
+                                       required>
+                                <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password_confirm" class="form-label">
+                                Konfirmasi Password <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" class="form-control" id="password_confirm" name="password_confirm" 
+                                       placeholder="Ulangi password"
+                                       minlength="8"
+                                       required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {/if}
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-body text-end">
+                    <a href="{url='admin/users/manage'}" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </a>
+                    <button type="button" class="btn btn-primary" id="btnSave">
+                        <i class="fas fa-save me-1"></i> Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{/section}
+
+{section='scripts'}
+<script>
+// Toggle password visibility
+document.getElementById('togglePassword')?.addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    this.querySelector('i').classList.toggle('fa-eye');
+    this.querySelector('i').classList.toggle('fa-eye-slash');
+});
+
+// Toggle status label
+document.getElementById('status')?.addEventListener('change', function() {
+    document.getElementById('statusLabel').textContent = this.checked ? 'Aktif' : 'Nonaktif';
+});
+
+// Save form
+document.getElementById('btnSave')?.addEventListener('click', function() {
+    // Combine forms
+    const formData = new FormData();
+    
+    // Get values from main form
+    document.querySelectorAll('#userForm input, #userForm select').forEach(el => {
+        if (el.type === 'checkbox') {
+            if (el.checked) formData.append(el.name, el.value);
+        } else if (el.tagName !== 'SELECT' || !el.multiple) {
+            formData.append(el.name, el.value);
+        } else {
+            Array.from(el.selectedOptions).forEach(opt => {
+                formData.append(el.name + '[]', opt.value);
+            });
+        }
+    });
+    
+    // Get values from second form
+    document.querySelectorAll('#userForm2 input, #userForm2 select').forEach(el => {
+        if (el.type === 'checkbox') {
+            if (el.checked) formData.append(el.name, el.value);
+        } else if (el.tagName !== 'SELECT' || !el.multiple) {
+            if (!formData.has(el.name)) {
+                formData.append(el.name, el.value);
+            }
+        } else {
+            Array.from(el.selectedOptions).forEach(opt => {
+                formData.append(el.name + '[]', opt.value);
+            });
+        }
+    });
+    
+    // Get password values if form exists
+    if (document.getElementById('passwordForm')) {
+        const password = document.getElementById('password').value;
+        const passwordConfirm = document.getElementById('password_confirm').value;
+        
+        if (!password || password.length < 8) {
+            alert('Password minimal 8 karakter');
+            return;
+        }
+        
+        if (password !== passwordConfirm) {
+            alert('Konfirmasi password tidak cocok');
+            return;
+        }
+        
+        formData.append('password', password);
+        formData.append('password_confirm', passwordConfirm);
+    }
+    
+    // Submit
+    const btnSave = document.getElementById('btnSave');
+    btnSave.disabled = true;
+    btnSave.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
+    
+    fetch("{url='admin/users/save'}", {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.href = data.redirect || "{url='admin/users/manage'}";
+        } else {
+            alert(data.message || 'Gagal menyimpan user');
+            btnSave.disabled = false;
+            btnSave.innerHTML = '<i class="fas fa-save me-1"></i> Simpan';
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Terjadi kesalahan');
+        btnSave.disabled = false;
+        btnSave.innerHTML = '<i class="fas fa-save me-1"></i> Simpan';
+    });
+});
+
+// Validate password match
+document.getElementById('password_confirm')?.addEventListener('blur', function() {
+    const password = document.getElementById('password').value;
+    if (this.value !== password) {
+        this.setCustomValidity('Password tidak cocok');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+{/section}

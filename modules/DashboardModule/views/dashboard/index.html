@@ -1,0 +1,162 @@
+{extends='admin/layout.html'}
+
+{section='title'}Dashboard{/section}
+
+{section='page_title'}Dashboard{/section}
+{section='page_subtitle'}Selamat datang di SIMRS Modern{/section}
+
+{section='content'}
+<!-- Statistics Cards Row -->
+<div class="row g-4 mb-4">
+    <!-- Patients Today -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="stat-icon bg-primary-light">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Pasien Hari Ini</div>
+                <div class="stat-value">{$stats.patients_today}</div>
+                <div class="stat-change positive">
+                    <i class="bi bi-arrow-up"></i> 12% dari kemarin
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients This Month -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="stat-icon bg-success-light">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Pasien Bulan Ini</div>
+                <div class="stat-value">{$stats.patients_month}</div>
+                <div class="stat-change positive">
+                    <i class="bi bi-arrow-up"></i> 8% dari bulan lalu
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inpatients -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="stat-icon bg-warning-light">
+                <i class="bi bi-heart-pulse"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Rawat Inap</div>
+                <div class="stat-value">{$stats.inpatients}</div>
+                <div class="stat-change">
+                    <span class="text-muted">Okupansi: 75%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Today -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="stat-icon bg-danger-light">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Pendapatan Hari Ini</div>
+                <div class="stat-value">{if $stats.revenue_today > 0}{number_format($stats.revenue_today, 0, ',', '.')}{else}0{/if}</div>
+                <div class="stat-change positive">
+                    <i class="bi bi-arrow-up"></i> 15% dari kemarin
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities Table -->
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h6 class="mb-0">
+            <i class="bi bi-clock-history me-2"></i>Aktivitas Terbaru
+        </h6>
+        <a href="#" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+    </div>
+    <div class="card-body p-0">
+        {if !empty($recent_activities)}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>No. Rawat</th>
+                        <th>Pasien</th>
+                        <th>Poli</th>
+                        <th>Status</th>
+                        <th>Waktu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop: $recent_activities as $activity}
+                    <tr>
+                        <td>
+                            <code class="text-primary">{$activity.no_rawat}</code>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle me-2">
+                                    {strtoupper(substr($activity.nm_pasien, 0, 1))}
+                                </div>
+                                <span class="fw-medium">{$activity.nm_pasien}</span>
+                            </div>
+                        </td>
+                        <td>{$activity.nm_poli}</td>
+                        <td>
+                            {if $activity.stts == 'Belum'}
+                            <span class="badge bg-secondary">Belum</span>
+                            {elseif $activity.stts == 'Periksa'}
+                            <span class="badge bg-primary">Periksa</span>
+                            {elseif $activity.stts == 'Selesai'}
+                            <span class="badge bg-success">Selesai</span>
+                            {else}
+                            <span class="badge bg-info">{$activity.stts}</span>
+                            {/if}
+                        </td>
+                        <td class="text-muted small">
+                            <i class="bi bi-calendar3 me-1"></i>{$activity.tgl_registrasi}
+                            <br>
+                            <i class="bi bi-clock me-1"></i>{$activity.jam_reg}
+                        </td>
+                    </tr>
+                    {/loop}
+                </tbody>
+            </table>
+        </div>
+        {else}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+            <p class="text-muted mt-3 mb-0">Belum ada aktivitas</p>
+        </div>
+        {/if}
+    </div>
+</div>
+{/section}
+
+{section='scripts'}
+<script>
+// Auto-refresh statistics every 5 minutes
+setInterval(function() {
+    fetch("{url='admin/dashboard/api/stats'}", {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Stats refreshed:', data.data);
+            // Update DOM elements here if needed
+        }
+    })
+    .catch(err => console.error('Error refreshing stats:', err));
+}, 300000); // 5 minutes
+</script>
+{/section}

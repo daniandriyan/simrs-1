@@ -1,0 +1,340 @@
+{extends='admin/layout.html'}
+
+{section='title'}Manajemen User{/section}
+
+{section='content'}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-users me-2"></i>Manajemen User
+        </h1>
+        {if $mlite_crud_permissions.can_create}
+        <a href="{url='admin/users/form'}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Tambah User
+        </a>
+        {/if}
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" action="{url='admin/users/manage'}" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" name="q" 
+                               placeholder="Cari username, nama, atau email..."
+                               value="{$search}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Cari
+                        </button>
+                        {if !empty($search)}
+                        <a href="{url='admin/users/manage'}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Reset
+                        </a>
+                        {/if}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Daftar User</h6>
+            <span class="badge bg-primary">{$pagination.total} Total</span>
+        </div>
+        <div class="card-body p-0">
+            {if !empty($users)}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th width="5%">ID</th>
+                            <th width="20%">Username</th>
+                            <th width="25%">Nama Lengkap</th>
+                            <th width="20%">Email</th>
+                            <th width="10%">Role</th>
+                            <th width="8%">Status</th>
+                            <th width="12%" class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loop: $users as $user}
+                        <tr>
+                            <td><strong>#{$user.id}</strong></td>
+                            <td>
+                                <span class="font-weight-bold text-primary">{$user.username}</span>
+                            </td>
+                            <td>
+                                {if !empty($user.avatar)}
+                                <img src="{url='uploads/users/'}{$user.avatar}" 
+                                     class="rounded-circle me-2" width="30" height="30" 
+                                     style="object-fit: cover;">
+                                {/if}
+                                {$user.fullname}
+                            </td>
+                            <td>{$user.email}</td>
+                            <td>
+                                <span class="badge bg-{if $user.role == 'admin'}danger{elseif $user.role == 'dokter'}info{elseif $user.role == 'staff'}secondary{else}success{/if}">
+                                    <i class="fas fa-{if $user.role == 'admin'}user-shield{elseif $user.role == 'dokter'}user-md{elseif $user.role == 'perawat'}user-nurse{elseif $user.role == 'farmasi'}pills{elseif $user.role == 'lab'}flask{elseif $user.role == 'rad'}x-ray{elseif $user.role == 'kasir'}cash-register{else}user{/if} me-1"></i>
+                                    {$user.role}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{if $user.status == 1}success{else}secondary{/if}">
+                                    {if $user.status == 1}
+                                    <i class="fas fa-check-circle me-1"></i>Aktif
+                                    {else}
+                                    <i class="fas fa-times-circle me-1"></i>Nonaktif
+                                    {/if}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    {if $mlite_crud_permissions.can_update}
+                                    <a href="{url='admin/users/form/' . $user.id}" 
+                                       class="btn btn-info" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {/if}
+                                    
+                                    {if $user.id != $user.id}
+                                    <button type="button" class="btn btn-warning btn-toggle-status" 
+                                            data-id="{$user.id}" title="Toggle Status">
+                                        <i class="fas fa-{if $user.status == 1}ban{else}check{/if}"></i>
+                                    </button>
+                                    {/if}
+                                    
+                                    {if $mlite_crud_permissions.can_delete && $user.id != $user.id}
+                                    <button type="button" class="btn btn-danger btn-delete" 
+                                            data-id="{$user.id}" 
+                                            data-name="{$user.username}"
+                                            title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {/if}
+                                </div>
+                            </td>
+                        </tr>
+                        {/loop}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {if $pagination.total_pages > 1}
+            <div class="card-footer bg-light">
+                <nav>
+                    <ul class="pagination pagination-sm mb-0 justify-content-end">
+                        {if $pagination.page > 1}
+                        <li class="page-item">
+                            <a class="page-link" href="{url='admin/users/manage'}?page={$pagination.page - 1}{if !empty($search)}&q={$search}{/if}">
+                                <i class="fas fa-chevron-left"></i> Prev
+                            </a>
+                        </li>
+                        {/if}
+
+                        {for $i = 1; $i <= $pagination.total_pages; $i++}
+                            {if $i == $pagination.page}
+                            <li class="page-item active">
+                                <span class="page-link">{$i}</span>
+                            </li>
+                            {elseif $i == 1 || $i == $pagination.total_pages || ($i >= $pagination.page - 2 && $i <= $pagination.page + 2)}
+                            <li class="page-item">
+                                <a class="page-link" href="{url='admin/users/manage'}?page={$i}{if !empty($search)}&q={$search}{/if}">{$i}</a>
+                            </li>
+                            {elseif $i == $pagination.page - 3 || $i == $pagination.page + 3}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            {/if}
+                        {/for}
+
+                        {if $pagination.page < $pagination.total_pages}
+                        <li class="page-item">
+                            <a class="page-link" href="{url='admin/users/manage'}?page={$pagination.page + 1}{if !empty($search)}&q={$search}{/if}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {/if}
+                    </ul>
+                </nav>
+            </div>
+            {/if}
+
+            {else}
+            <div class="text-center py-5">
+                <i class="fas fa-users-slash fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">Belum ada user</h5>
+                <p class="text-muted">Klik tombol "Tambah User" untuk menambahkan user baru</p>
+            </div>
+            {/if}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus user <strong id="deleteUsername"></strong>?</p>
+                <p class="text-danger small">
+                    <i class="fas fa-info-circle me-1"></i>
+                    User akan dinonaktifkan (soft delete), bukan dihapus permanen.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash me-1"></i> Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-key me-2"></i>Reset Password
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="resetUserId">
+                <div class="mb-3">
+                    <label class="form-label">Password Baru</label>
+                    <input type="password" class="form-control" id="newPassword" 
+                           placeholder="Minimal 8 karakter" minlength="8">
+                    <small class="text-muted">User harus mengganti password setelah login.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-warning" id="confirmReset">
+                    <i class="fas fa-key me-1"></i> Reset Password
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{/section}
+
+{section='scripts'}
+<script>
+let deleteUserId = null;
+
+// Delete user
+document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', function() {
+        deleteUserId = this.dataset.id;
+        const username = this.dataset.name;
+        document.getElementById('deleteUsername').textContent = username;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    });
+});
+
+document.getElementById('confirmDelete').addEventListener('click', function() {
+    if (!deleteUserId) return;
+
+    fetch("{url='admin/users/delete'}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: `_csrf_token={csrf_token}&id=${deleteUserId}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload();
+        } else {
+            alert(data.message || 'Gagal menghapus user');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Terjadi kesalahan');
+    });
+});
+
+// Toggle status
+document.querySelectorAll('.btn-toggle-status').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const userId = this.dataset.id;
+        
+        fetch("{url='admin/users/toggleStatus'}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `_csrf_token={csrf_token}&id=${userId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message || 'Gagal mengubah status');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Terjadi kesalahan');
+        });
+    });
+});
+
+// Reset password
+document.getElementById('confirmReset')?.addEventListener('click', function() {
+    const userId = document.getElementById('resetUserId').value;
+    const newPassword = document.getElementById('newPassword').value;
+    
+    if (!newPassword || newPassword.length < 8) {
+        alert('Password minimal 8 karakter');
+        return;
+    }
+    
+    fetch("{url='admin/users/resetPassword'}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: `_csrf_token={csrf_token}&id=${userId}&new_password=${encodeURIComponent(newPassword)}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Password berhasil direset');
+            bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
+        } else {
+            alert(data.message || 'Gagal mereset password');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Terjadi kesalahan');
+    });
+});
+</script>
+{/section}
